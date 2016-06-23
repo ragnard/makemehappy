@@ -1,16 +1,10 @@
-CLASSPATH =
+.classpath: project.clj
+	@lein classpath \
+	| tr ':' '\n' \
+	| sed '/\.jar/!d' \
+	> .classpath
 
-repl: CLASSPATH = $(shell lein classpath)
-repl:
-	@java -cp $(CLASSPATH):src:dev clojure.main
+repl: .classpath
+	@java -cp $(shell cat .classpath | tr '\n' ':') clojure.main -i nrepl.clj -r
+.PHONY: repl
 
-docker-repl: CLASSPATH = $(shell lein classpath)
-docker-repl: 
-	@sudo docker run \
-		-v=$(shell pwd):/opt/makemehappy \
-		-v=$(HOME)/.m2/repository:$(HOME)/.m2/repository \
-		-w=/opt/makemehappy \
-		-i \
-		-t \
-		ragge/java7 \
-		java -cp $(CLASSPATH):dev:src clojure.main
